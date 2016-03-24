@@ -24,13 +24,12 @@
 
 
 typedef enum stateTypeEnum{
-    INITIAL, CONTROL
+    INITIAL, DRIVE_1, IDLE_1, DRIVE_2, IDLE_2
 } stateType;
 
 //Volatile variable declarations
 volatile stateType state = INITIAL;
 volatile unsigned int SW1_pressed = 0, SW1_toggle = 0;
-
 volatile unsigned int ADC_Value = 0;
 
 // ******************************************************************************************* //
@@ -46,11 +45,11 @@ int main(void)
     initTimer2();
     initLCD();
     delayMs(1);
-    //initSW();
+    initSW();
     initADC();
     initMotorControl();
     initPWM();
-    int TEMP = 0, i = 0;
+    int TEMP = 0, i = 0, UPDATE = 1;
     turnOnLED(0);
     for(i = 0; i < 20; i++) delayMs(50);
     turnOnLED(-1);
@@ -66,42 +65,57 @@ int main(void)
         if(IFS0bits.AD1IF == 1) 
         {   
             ADC_Value = ADC1BUF0;
-            
             IFS0bits.AD1IF = 0;
         }
-        if((abs(TEMP - ADC_Value)>= 5)){
-            delayMs(10);
-            //turnOnLED(1);
-            ENABLE_L = 1; ENABLE_R = 1;
-            MCG_L1 = DISABLE_ODC; MCG_R1 = DISABLE_ODC;
-            MCG_L2 = ENABLE_ODC; MCG_R2 = ENABLE_ODC;
-            updatePWM(TEMP/1023.0,0,REVERSE);
-//            if(ADC_Value >= 768) {
-//                turnOnLED(1);
-//                ENABLE_L = 1; ENABLE_R = 1;
-//                MCG_L1 = 1; MCG_R1 = 1;
-//                MCG_L2 = 0; MCG_R2 = 0;
-//                updatePWM(0.80,0,FORWARD);
-//            }else if(ADC_Value <= 256){
-//                turnOnLED(2);
-//                ENABLE_L = 1; ENABLE_R = 1;
-//                MCG_L1 = 0; MCG_R1 = 0;
-//                MCG_L2 = 1; MCG_R2 = 1;
-//                updatePWM(0.80 ,0,REVERSE);
-//            }else{
-//                turnOnLED(-1);
-//                ENABLE_L = 1; ENABLE_R = 1;
-//                MCG_L1 = 0; MCG_R1 = 0;
-//                MCG_L2 = 0; MCG_R2 = 0;
-//                updatePWM(0.60,0,IDLE);
-//           }
-            clearLCD();
-            moveCursorLCD(1,1);
-            displayVoltage(0,ADC_Value);
-        }
-         if(abs(TEMP - ADC_Value)>= 5) TEMP = ADC_Value;   
-    }
-            
+        if(abs(TEMP - ADC_Value)>= 5) UPDATE = 1;
+        
+        if(SW1_pressed) delayMs(10);
+        
+        switch(state){
+            case INITIAL:
+                turnOnLED(0);
+                TEMP = readADC(TEMP, ADC_Value);
+                updatePWM(TEMP/1023.0,SYNC,IDLE);
+                if(SW1_toggle){ state = DRIVE_1; SW1_toggle = 0; delayMs(10); 
+                                UPDATE = 1;}
+                break;
+            case DRIVE_1:
+                turnOnLED(1);
+                TEMP = readADC(TEMP, ADC_Value);
+                if(UPDATE){
+                    updatePWM(getDutyCycle(TEMP,LEFT),LEFT,FORWARD);
+                    updatePWM(getDutyCycle(TEMP,RIGHT),RIGHT,FORWARD);
+                    UPDATE = 0;
+                }
+                if(SW1_toggle){ state = IDLE_1; SW1_toggle = 0; delayMs(10);}
+                break;
+            case IDLE_1:
+                turnOnLED(0);
+                TEMP = readADC(TEMP, ADC_Value);
+                updatePWM(TEMP/1023.0,0,IDLE);
+                if(SW1_toggle){ state = DRIVE_2; SW1_toggle = 0; delayMs(10);
+                                UPDATE = 1;}
+                break;
+            case DRIVE_2:
+                turnOnLED(2);
+                TEMP = readADC(TEMP, ADC_Value);
+                if(UPDATE){
+                    updatePWM(getDutyCycle(TEMP,LEFT),LEFT,REVERSE);
+                    updatePWM(getDutyCycle(TEMP,RIGHT),RIGHT,REVERSE);
+                    UPDATE = 0;
+                }
+                if(SW1_toggle){ state = IDLE_2; SW1_toggle = 0; delayMs(10);}
+                break;
+            case IDLE_2:
+                turnOnLED(0);
+                TEMP = readADC(TEMP, ADC_Value);
+                updatePWM(TEMP/1023.0,SYNC,IDLE);
+                if(SW1_toggle){ state = DRIVE_1; SW1_toggle = 0; delayMs(10);
+                                UPDATE = 1;}
+                break;
+        }   
+        
+    }        
     return 0;
 }
 

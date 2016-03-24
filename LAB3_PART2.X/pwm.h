@@ -11,6 +11,7 @@
 
 #include <math.h>
 #include <xc.h>
+#include "adc.h"
 
 #define ENABLE_ODC 0
 #define DISABLE_ODC 1
@@ -18,6 +19,9 @@
 #define FORWARD 1
 #define REVERSE 0
 #define IDLE 2
+#define SYNC 0
+#define LEFT 1
+#define RIGHT 2
 #define INPUT 1
 #define OUTPUT 0
 //CONTROL REGISTERS FOR PWM
@@ -52,7 +56,10 @@ void initMotorControl();
 //Configures PWM for motor control
 void initPWM();
 
+//Adjusts and updates PWM for motor control
 void updatePWM(float duty, int motor, int direction);
 
+//Determines duty cycle based on input ADC Value
+float getDutyCycle(int ADC_Value, int motor);
 #endif	/* PWM_H */
 
