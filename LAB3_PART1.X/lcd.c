@@ -75,7 +75,6 @@ void writeLCD(unsigned char word, unsigned int commandType, unsigned int delayAf
 /* Given a character, write it to the LCD. RS should be set to the appropriate value.
  */
 void printCharLCD(char c) {
-    //TODO:
     writeLCD(c,1,50);
 }
 /*Initialize the LCD

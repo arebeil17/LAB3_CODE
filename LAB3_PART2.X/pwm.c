@@ -92,7 +92,7 @@ void updatePWM(float duty, int motor, int direction){
         MAP_L2_OC1 = OC1;
         MAP_R1_OC3 = 0;
         MAP_R2_OC3 = OC3;
-    }else if(direction == REVERSE){
+    }else if(direction == BACKWARD){
         ENABLE_L = 1; ENABLE_R = 1;
         MCG_L1 = DISABLE_ODC; MCG_R1 = DISABLE_ODC;
         MCG_L2 = ENABLE_ODC;  MCG_R2 = ENABLE_ODC;
@@ -121,7 +121,7 @@ float getDutyCycle(int ADC_Value, int motor){
         if(ADC_Value <= ADC_MIDPOINT) duty = 1.0; //ADC_RESOLUTION = 1024
         else duty = (ADC_RESOLUTION - 2*diff)/(ADC_RESOLUTION * 1.0);
     }else if(motor == RIGHT){
-        if(ADC_Value > ADC_MIDPOINT) duty = 1.0;
+        if(ADC_Value >= ADC_MIDPOINT) duty = 1.0;
         else duty = (ADC_RESOLUTION - 2*diff)/(ADC_RESOLUTION * 1.0);
     }
     return duty;

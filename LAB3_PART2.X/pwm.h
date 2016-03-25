@@ -17,7 +17,7 @@
 #define DISABLE_ODC 1
 #define ENABLED 1
 #define FORWARD 1
-#define REVERSE 0
+#define BACKWARD 0
 #define IDLE 2
 #define SYNC 0
 #define LEFT 1

@@ -1,7 +1,7 @@
 // ******************************************************************************************* //
 //
-// File:         lab1p2.c
-// Date:         Feb 16, 2016
+// File:         LAB3_PART1
+// Date:         March 16, 2016
 // Authors:      Andres D. Rebeil
 //
 // Description: 
@@ -17,11 +17,6 @@
 #include "interrupt.h"
 #include "adc.h"
 #include "pwm.h"
-
-#define pressed 0
-#define released 1
-#define SW1 PORTAbits.RA7 
-
 
 typedef enum stateTypeEnum{
     INITIAL, CONTROL
@@ -46,9 +41,7 @@ int main(void)
     initTimer2();
     initLCD();
     delayMs(1);
-    //initSW();
     initADC();
-    initMotorControl();
     initPWM();
     int TEMP = 0, i = 0;
     turnOnLED(0);
@@ -61,70 +54,35 @@ int main(void)
     moveCursorLCD(1,1);
     displayVoltage(0,ADC_Value);
     //INITIALIZATION COMPLETE
+    
     while(1)
     {   
         if(IFS0bits.AD1IF == 1) 
         {   
             ADC_Value = ADC1BUF0;
-            
             IFS0bits.AD1IF = 0;
         }
-        if((abs(TEMP - ADC_Value)>= 5)){
-            delayMs(10);
-            //turnOnLED(1);
-            ENABLE_L = 1; ENABLE_R = 1;
-            MCG_L1 = DISABLE_ODC; MCG_R1 = DISABLE_ODC;
-            MCG_L2 = ENABLE_ODC; MCG_R2 = ENABLE_ODC;
-            updatePWM(TEMP/1023.0,0,REVERSE);
-//            if(ADC_Value >= 768) {
-//                turnOnLED(1);
-//                ENABLE_L = 1; ENABLE_R = 1;
-//                MCG_L1 = 1; MCG_R1 = 1;
-//                MCG_L2 = 0; MCG_R2 = 0;
-//                updatePWM(0.80,0,FORWARD);
-//            }else if(ADC_Value <= 256){
-//                turnOnLED(2);
-//                ENABLE_L = 1; ENABLE_R = 1;
-//                MCG_L1 = 0; MCG_R1 = 0;
-//                MCG_L2 = 1; MCG_R2 = 1;
-//                updatePWM(0.80 ,0,REVERSE);
-//            }else{
-//                turnOnLED(-1);
-//                ENABLE_L = 1; ENABLE_R = 1;
-//                MCG_L1 = 0; MCG_R1 = 0;
-//                MCG_L2 = 0; MCG_R2 = 0;
-//                updatePWM(0.60,0,IDLE);
-//           }
-            clearLCD();
-            moveCursorLCD(1,1);
-            displayVoltage(0,ADC_Value);
+        switch(state){
+            case INITIAL:
+                turnOnLED(1);
+                for(i = 0; i < 20; i++) delayMs(50);
+                state = CONTROL;
+            break;
+            case CONTROL:
+                turnOnLED(2);
+                if((abs(TEMP - ADC_Value)>= 5)){
+                    delayMs(10);
+                    ENABLE_L = 1; ENABLE_R = 1;
+                    MCG_L1 = DISABLE_ODC; MCG_R1 = DISABLE_ODC;
+                    MCG_L2 = ENABLE_ODC;  MCG_R2 = ENABLE_ODC;
+                    updatePWM(TEMP/1023.0, 0, REVERSE);
+                    clearLCD();
+                    moveCursorLCD(1,1);
+                    displayVoltage(0, ADC_Value);
+                }
+            break; 
         }
-         if(abs(TEMP - ADC_Value)>= 5) TEMP = ADC_Value;   
-    }
-            
+        if(abs(TEMP - ADC_Value)>= 5) TEMP = ADC_Value;   
+    }      
     return 0;
 }
-
-void __ISR(_CHANGE_NOTICE_VECTOR, IPL7SRS) _CNInterrupt(void){
-    //----------------------------------------
-    int j;
-    PORTA;
-    j = SW1; //RA7
-
-    //CHECK SW2 TOGGLE
-    if(SW1 == pressed){
-        SW1_pressed = 1;
-    }else if((SW1 == released) && (SW1_pressed == 1)){
-        SW1_pressed = 0;
-        SW1_toggle = 1;
-    }
-    //RESET FLAGS
-    IFS1bits.CNAIF = 0; //FLAG DOWN
-}
-
-//void __ISR(_ADC_VECTOR, IPL7AUTO) _ADCInterrupt(void){
-//    
-//    IFS0bits.AD1IF = 0;
-//    
-//    ADC_Value = ADC1BUF0;
-//}

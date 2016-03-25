@@ -40,7 +40,6 @@ void initADC(){
 unsigned int readADC(int TEMP, int ADC_Value){
     
     if((abs(TEMP - ADC_Value)>= 5)){   
-        //clearLCD();
         moveCursorLCD(1,1);
         displayVoltage(0,TEMP);
     }

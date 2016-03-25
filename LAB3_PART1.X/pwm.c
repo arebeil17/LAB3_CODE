@@ -34,10 +34,7 @@ void initPWM(){
     //-------------------------------------
     //FOR MOTOR 1 LEFT
     //-------------------------------------
-    //TRIS_RD0 = OUTPUT; TRIS_RD1 = OUTPUT;
     OC1CON = 0x0000; //Turn off OC1 while doing setup
-//    RPD0Rbits.RPD0R = OC1; //MAP OC1 TO RD0
-//    RPD1Rbits.RPD1R = OC1; //MAP OC1 TO RD1
     
     T2CONbits.TCKPS = 0;
     //PERIOD CONTROL
@@ -56,11 +53,8 @@ void initPWM(){
     //-------------------------------------
     //FOR MOTOR 2 RIGHT
     //-------------------------------------
-    //TRIS_RB5 = OUTPUT; TRIS_RD2 = OUTPUT;
     OC3CON = 0x0000; //Turn off OC3 while doing setup
-//    RPF1Rbits.RPF1R = OC3; //MAP OC3 TO RF1
-//    RPD2Rbits.RPD2R = OC3; //MAP OC3 TO RD2
-    
+ 
     T3CONbits.TCKPS = 0;
     //PERIOD CONTROL
     PR3 = 1023;
