@@ -31,10 +31,10 @@ void initPWM(){
     initMotorControl();
     ANSELD = 0x0000;
     ANSELF = 0x0000;
+    
     //-------------------------------------
     //FOR MOTOR 1 LEFT
     //-------------------------------------
-    //TRIS_RD0 = OUTPUT; TRIS_RD1 = OUTPUT;
     OC1CON = 0x0000; //Turn off OC1 while doing setup
     
     T2CONbits.TCKPS = 0;
@@ -51,10 +51,10 @@ void initPWM(){
     OC1CONbits.OCM = 6; //6
     OC1CONbits.ON = 1;
     OC1CONSET = 0x8000; //Enable OC1
+    
     //-------------------------------------
     //FOR MOTOR 2 RIGHT
     //-------------------------------------
-    //TRIS_RB5 = OUTPUT; TRIS_RD2 = OUTPUT;
     OC3CON = 0x0000; //Turn off OC3 while doing setup
     
     T3CONbits.TCKPS = 0;
@@ -72,7 +72,7 @@ void initPWM(){
     OC3CONbits.ON = 1;
     OC3CONSET = 0x8000; //Enable OC3
 }
-
+//Updates PWM and pin mapping for motor control
 void updatePWM(float duty, int motor, int direction){
     
     TMR2 = 0; TMR3 = 0; //RESET TIMERS
